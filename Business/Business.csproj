@@ -4,6 +4,14 @@
     <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\Responses\" />
+    <Folder Include="Contracts\Requests\" />
+    <Folder Include="Factories\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Mappings\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
