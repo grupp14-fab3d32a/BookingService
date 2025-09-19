@@ -2,8 +2,12 @@ using Business.Interfaces;
 using Business.Services;
 using Data.Interfaces;
 using Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<Data.Context.BookingContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IBookingService, BookingService>();
 

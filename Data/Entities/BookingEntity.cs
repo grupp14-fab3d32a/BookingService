@@ -1,10 +1,17 @@
-﻿namespace Data.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Data.Entities;
+
+public class BookingEntity
 {
-    public class BookingEntity
-    {
-        Guid Id { get; set; }
-        Guid MemberId { get; set; }
-        Guid WorkoutId { get; set; }
-        DateTime CreatedAt { get; set; }
-    }
+    [Key]
+    Guid Id { get; set; }         //Primary key
+
+    [Required]
+    Guid MemberId { get; set; }   //External reference to UserService
+
+    [Required]
+    Guid WorkoutId { get; set; }  //External reference to ScheduleService
+
+    DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
