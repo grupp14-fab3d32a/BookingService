@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <Folder Include="Contracts\Responses\" />
-    <Folder Include="Contracts\Requests\" />
     <Folder Include="Factories\" />
     <Folder Include="Helpers\" />
     <Folder Include="Mappings\" />
