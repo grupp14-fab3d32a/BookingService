@@ -17,4 +17,10 @@ public class BookingRepository(BookingContext context) : IBookingRepository
     {
         return await _context.Bookings.FirstOrDefaultAsync(b => b.Id == id);
     }
+    public async Task<bool> ExistsAsync(Guid workoutId, Guid memberId)
+    {
+        return await _context.Bookings.AnyAsync(b =>
+            b.WorkoutId == workoutId &&
+            b.MemberId == memberId);
+    }
 }

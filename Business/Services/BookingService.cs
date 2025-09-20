@@ -13,14 +13,18 @@ public class BookingService(IBookingRepository repository, BookingContext contex
     private readonly IBookingRepository _repository = repository;
     private readonly BookingContext _context = context;
 
-    public async Task<Guid> CreateBookingAsync(CreateBookingRequest request)
+    public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
     {
+        var alreadyBooked = await _repository.ExistsAsync(request.WorkoutId, request.MemberId);
+        if (alreadyBooked)
+            throw new InvalidOperationException("Member is already booked for this workout.");
+
         var booking = BookingFactory.Create(request);
 
         await _repository.AddAsync(booking);
         await _context.SaveChangesAsync();
 
-        return booking.Id;
+        return BookingMapper.ToResponse(booking);
     }
 
     public async Task<BookingResponse?> GetBookingByIdAsync(Guid id)

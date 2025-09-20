@@ -1,4 +1,5 @@
-﻿using Business.Contracts.Requests;
+﻿using Azure;
+using Business.Contracts.Requests;
 using Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +17,15 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var bookingId = await _bookingService.CreateBookingAsync(request);
-
-        return CreatedAtAction(nameof(GetBookingById), new { id = bookingId }, new { id = bookingId });
-
+        try
+        {
+            var response = await _bookingService.CreateBookingAsync(request);
+            return CreatedAtAction(nameof(GetBookingById), new { id = response.Id }, response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message }); // HTTP 409 Conflict
+        }
     }
 
     [HttpGet("{id}")]
