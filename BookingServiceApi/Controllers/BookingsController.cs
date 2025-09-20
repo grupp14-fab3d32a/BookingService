@@ -1,11 +1,14 @@
 ﻿using Azure;
 using Business.Contracts.Requests;
 using Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingServiceApi.Controllers;
 
 [Route("api/[controller]")]
+
+//[Authorize(Roles = "Member")] uncomment this line to enable authorization !!!!!!!!!!!!!!!!!!!!
 [ApiController]
 public class BookingsController(IBookingService bookingService) : ControllerBase
 {
