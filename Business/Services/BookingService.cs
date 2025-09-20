@@ -1,4 +1,5 @@
 ﻿using Business.Contracts.Requests;
+using Business.Factories;
 using Business.Interfaces;
 using Data.Context;
 using Data.Entities;
@@ -11,9 +12,14 @@ public class BookingService(IBookingRepository repository, BookingContext contex
     private readonly IBookingRepository _repository = repository;
     private readonly BookingContext _context = context;
 
-    public Task<Guid> CreateBookingAsync(CreateBookingRequest request)
+    public async Task<Guid> CreateBookingAsync(CreateBookingRequest request)
     {
-        throw new NotImplementedException();
+        var booking = BookingFactory.Create(request);
+
+        await _repository.AddAsync(booking);
+        await _context.SaveChangesAsync();
+
+        return booking.Id;
     }
 }
 
