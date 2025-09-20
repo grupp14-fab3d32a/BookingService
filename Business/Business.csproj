@@ -5,9 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\Responses\" />
     <Folder Include="Helpers\" />
-    <Folder Include="Mappings\" />
   </ItemGroup>
 
   <PropertyGroup>

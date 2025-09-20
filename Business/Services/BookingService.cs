@@ -1,8 +1,9 @@
 ﻿using Business.Contracts.Requests;
+using Business.Contracts.Responses;
 using Business.Factories;
 using Business.Interfaces;
+using Business.Mappings;
 using Data.Context;
-using Data.Entities;
 using Data.Interfaces;
 
 namespace Business.Services;
@@ -21,5 +22,14 @@ public class BookingService(IBookingRepository repository, BookingContext contex
 
         return booking.Id;
     }
-}
 
+    public async Task<BookingResponse?> GetBookingByIdAsync(Guid id)
+    {
+        var booking = await _repository.GetByIdAsync(id);
+
+        if (booking == null)
+            return null;    
+
+        return BookingMapper.ToResponse(booking);  
+    }
+}
