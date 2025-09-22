@@ -6,5 +6,6 @@
         public Guid MemberId { get; set; }
         public Guid WorkoutId { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsCancelled { get; set; }
     }
 }

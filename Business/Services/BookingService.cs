@@ -36,4 +36,20 @@ public class BookingService(IBookingRepository repository, BookingContext contex
 
         return BookingMapper.ToResponse(booking);  
     }
+
+    public async Task<bool> CancelBookingAsync(Guid id)
+    {
+        //Add business logic like time restrictions for cancelling here if needed
+
+        var booking = await _repository.GetByIdAsync(id);
+
+        if (booking == null || booking.IsCancelled)
+            return false;
+        
+        _repository.MarkAsCancelled(booking);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
 }

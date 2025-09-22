@@ -13,14 +13,21 @@ public class BookingRepository(BookingContext context) : IBookingRepository
     {
         await _context.Bookings.AddAsync(booking);
     }
+
     public async Task<BookingEntity?> GetByIdAsync(Guid id)
     {
-        return await _context.Bookings.FirstOrDefaultAsync(b => b.Id == id);
+        return await _context.Bookings.FindAsync(id);
     }
+
     public async Task<bool> ExistsAsync(Guid workoutId, Guid memberId)
     {
         return await _context.Bookings.AnyAsync(b =>
             b.WorkoutId == workoutId &&
             b.MemberId == memberId);
+    }
+
+    public void MarkAsCancelled(BookingEntity booking)
+    {
+        booking.IsCancelled = true;
     }
 }
