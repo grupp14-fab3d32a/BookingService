@@ -14,4 +14,6 @@ public class BookingEntity
     public Guid WorkoutId { get; set; }                 //External reference to ScheduleService
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsCancelled { get; set; } = false;
 }
