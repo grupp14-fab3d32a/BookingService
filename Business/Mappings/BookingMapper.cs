@@ -12,7 +12,9 @@ public static class BookingMapper
             Id = entity.Id,
             MemberId = entity.MemberId,
             WorkoutId = entity.WorkoutId,
-            CreatedAt = entity.CreatedAt
+            CreatedAt = entity.CreatedAt,
+            IsCancelled = entity.IsCancelled
+
         };
     }
 }
