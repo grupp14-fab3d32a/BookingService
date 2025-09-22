@@ -26,15 +26,8 @@ public class BookingRepository(BookingContext context) : IBookingRepository
             b.MemberId == memberId);
     }
 
-    public async Task<bool> CancelBookingAsync(Guid id)
+    public void MarkAsCancelled(BookingEntity booking)
     {
-        var booking = await _context.Bookings.FindAsync(id);
-        if (booking == null || booking.IsCancelled)
-        {
-            return false; // Booking not found or already cancelled
-        }
         booking.IsCancelled = true;
-        await _context.SaveChangesAsync();
-        return true;
     }
 }
