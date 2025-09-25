@@ -11,6 +11,11 @@ public class BookingContext(DbContextOptions<BookingContext> options) : DbContex
     {
         base.OnModelCreating(modelBuilder);
 
+        // Global query filter: exclude cancelled bookings from all queries
+        modelBuilder.Entity<BookingEntity>()
+            .HasQueryFilter(b => !b.IsCancelled);
+
+        // Seed data
         modelBuilder.Entity<BookingEntity>().HasData(
             new BookingEntity
             {

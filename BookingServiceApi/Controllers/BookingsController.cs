@@ -41,4 +41,15 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> CancelBooking(Guid id)
+    {
+        var success = await _bookingService.CancelBookingAsync(id);
+
+        if (!success)
+            return NotFound();
+
+        return NoContent();
+    }
 }
