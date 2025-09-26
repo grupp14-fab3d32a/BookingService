@@ -31,6 +31,17 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         }
     }
 
+    [HttpGet("member/{memberId}")]
+    public async Task<IActionResult> GetAllBookingsByMemberId(Guid memberId)
+    {
+        var response = await _bookingService.GetAllBookingsByMemberIdAsync(memberId);
+        if (response == null)
+            return NotFound();
+
+        return Ok(response);
+    }
+
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetBookingById(Guid id)
     {
@@ -42,10 +53,10 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         return Ok(response);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> CancelBooking(Guid id)
+    [HttpDelete("{memberId}/{workoutId}")]
+    public async Task<IActionResult> CancelBooking(Guid memberId, Guid workoutId)
     {
-        var success = await _bookingService.CancelBookingAsync(id);
+        var success = await _bookingService.CancelBookingAsync(memberId, workoutId);
 
         if (!success)
             return NotFound();
