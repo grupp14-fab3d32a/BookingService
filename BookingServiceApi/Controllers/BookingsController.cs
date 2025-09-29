@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using System.Data;
+using Azure;
 using Business.Contracts.Requests;
 using Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -56,11 +57,19 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     [HttpDelete("{memberId}/{workoutId}")]
     public async Task<IActionResult> CancelBooking(Guid memberId, Guid workoutId)
     {
-        var success = await _bookingService.CancelBookingAsync(memberId, workoutId);
+        try
+        {
+            var success = await _bookingService.CancelBookingAsync(memberId, workoutId);
 
-        if (!success)
-            return NotFound();
+            if (!success)
+                return NotFound();
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (InvalidExpressionException ex)
+        {
+            return Conflict( new { message  = ex.Message });
+        }
+
     }
 }

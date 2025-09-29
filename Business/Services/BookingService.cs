@@ -108,6 +108,8 @@ public class BookingService(IBookingRepository repository, BookingContext contex
     {
         //Add business logic like time restrictions for cancelling here if needed
 
+        var baseUrl = _configuration["ScheduleServiceBaseUrl"];
+
         var booking = await _repository.GetAsync(x => x.MemberId == memberId &&  x.WorkoutId == workoutId);
 
         if (booking == null || booking.IsCancelled)
@@ -115,6 +117,8 @@ public class BookingService(IBookingRepository repository, BookingContext contex
         
         _repository.MarkAsCancelled(booking);
         await _context.SaveChangesAsync();
+
+        await DecrementSpotsAsync(baseUrl, workoutId);
 
         return true;
     }
