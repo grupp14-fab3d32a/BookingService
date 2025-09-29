@@ -30,11 +30,11 @@ builder.Services.AddDbContext<BookingContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IBookingService, BookingService>();
-
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpClient<IBookingService, BookingService>();
 
 builder.Services.AddCors(options =>
 {
