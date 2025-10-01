@@ -48,11 +48,15 @@ jobs:
         with:
           name: .net-app
 
+      - name: List solution files
+        run: dir /s /b *.sln
+
       - name: Apply EF Core migrations
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef --version 9.0.9
           $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
-          dotnet ef database update --project BookingService.sln --startup-project ./BookingServiceApi/BookingServiceApi.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION }}"
+          dotnet ef database update --project ./BookingService.sln --startup-project ./BookingServiceApi/BookingServiceApi.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION }}"
+
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -70,6 +74,7 @@ jobs:
           package: .
 
           
+
 
 
 
