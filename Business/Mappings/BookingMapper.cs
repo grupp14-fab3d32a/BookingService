@@ -14,7 +14,6 @@ public static class BookingMapper
             WorkoutId = entity.WorkoutId,
             CreatedAt = entity.CreatedAt,
             IsCancelled = entity.IsCancelled
-
         };
     }
 }
