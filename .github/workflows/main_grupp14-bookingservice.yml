@@ -51,9 +51,7 @@ jobs:
       - name: Apply EF Core migrations
         run: |
           dotnet tool install --global dotnet-ef
-          dotnet ef database update --project BookingService/BookingServiceApi/BookingServiceApi.csproj \
-                                    --startup-project BookingService/BookingServiceApi/BookingServiceApi.csproj \
-                                    --connection "${{ secrets.AZURE_SQL_CONNECTION }}"
+          dotnet ef database update --project BookingService/BookingServiceApi/BookingServiceApi.csproj --startup-project BookingService/BookingServiceApi/BookingServiceApi.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION }}"
         env:
           PATH: ${{ env.PATH }}:/home/runner/.dotnet/tools
       
@@ -73,5 +71,6 @@ jobs:
           package: .
 
           
+
 
 
