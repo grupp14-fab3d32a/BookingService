@@ -429,3 +429,4 @@ FodyWeavers.xsd
 
 /BookingService/BookingServiceApi/appsettings.json
 /BookingService/BookingServiceApi/appsettings.Development.json
+/BookingServiceApi/appsettings.json
