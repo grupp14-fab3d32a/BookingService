@@ -35,6 +35,7 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient<IBookingService, BookingService>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
 {
