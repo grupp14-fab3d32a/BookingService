@@ -8,15 +8,17 @@ using Business.Mappings;
 using Data.Context;
 using Data.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace Business.Services;
 
-public class BookingService(IBookingRepository repository, BookingContext context, HttpClient httpClient, IConfiguration configuration) : IBookingService
+public class BookingService(IBookingRepository repository, BookingContext context, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : IBookingService
 {
     private readonly IBookingRepository _repository = repository;
     private readonly BookingContext _context = context;
     private readonly HttpClient _httpClient = httpClient;
     private readonly IConfiguration _configuration = configuration;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
     public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
     {
@@ -63,25 +65,44 @@ public class BookingService(IBookingRepository repository, BookingContext contex
 
     public async Task<bool> HasAvailableSpotsAsync(string baseUrl, Guid workoutId)
     {
-        var response = await _httpClient.GetAsync($"{baseUrl}/api/workouts/has-available-spots/{workoutId}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/api/workouts/has-available-spots/{workoutId}");
+        var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+        if (!string.IsNullOrEmpty(token))
+        {
+            request.Headers.Add("Authorization", token);
+        }
+
+        var response = await _httpClient.SendAsync(request);
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException("Could not check available spots.");
+            throw new InvalidOperationException($"Could not check available spots. Status: {response.StatusCode}");
 
         return bool.Parse(await response.Content.ReadAsStringAsync());
     }
 
     public async Task IncrementSpotsAsync(string baseUrl, Guid workoutId)
     {
-        var response = await _httpClient.PostAsync($"{baseUrl}/api/workouts/increment/{workoutId}", null);
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/workouts/increment/{workoutId}");
+        var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+        if (!string.IsNullOrEmpty(token))
+        {
+            request.Headers.Add("Authorization", token);
+        }
+        var response = await _httpClient.SendAsync(request);
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException("Could not increment spots.");
+            throw new InvalidOperationException($"Could not increment spots. Status: {response.StatusCode}");
     }
 
     public async Task DecrementSpotsAsync(string baseUrl, Guid workoutId)
     {
-        var response = await _httpClient.PostAsync($"{baseUrl}/api/workouts/decrement/{workoutId}", null);
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/workouts/decrement/{workoutId}");
+        var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+        if (!string.IsNullOrEmpty(token))
+        {
+            request.Headers.Add("Authorization", token);
+        }
+        var response = await _httpClient.SendAsync(request);
         if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException("Could not decrement spots.");
+            throw new InvalidOperationException($"Could not decrement spots. Status: {response.StatusCode}");
     }
 
 
