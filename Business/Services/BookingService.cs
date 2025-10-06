@@ -14,134 +14,135 @@ namespace Business.Services;
 
 public class BookingService(IBookingRepository repository, BookingContext context, HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor) : IBookingService
 {
-    private readonly IBookingRepository _repository = repository;
-    private readonly BookingContext _context = context;
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly IConfiguration _configuration = configuration;
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+  private readonly IBookingRepository _repository = repository;
+  private readonly BookingContext _context = context;
+  private readonly HttpClient _httpClient = httpClient;
+  private readonly IConfiguration _configuration = configuration;
+  private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-    public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
+  public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
+  {
+    var baseUrl = _configuration["VITE_SCHEDULE_API_BASE_URL"];
+
+    var booking = await _repository.GetAsync(x => x.MemberId == request.MemberId && x.WorkoutId == request.WorkoutId);
+
+    //om bokning redan finns
+    if (booking != null)
     {
-        var baseUrl = _configuration["ScheduleServiceBaseUrl"];
-
-        var booking = await _repository.GetAsync(x => x.MemberId == request.MemberId && x.WorkoutId == request.WorkoutId);
-
-        //om bokning redan finns
-        if (booking != null)
-        {
-            if (booking.IsCancelled)
-            {
-                // kontrollera om plats finns
-                if (!await HasAvailableSpotsAsync(baseUrl, request.WorkoutId))
-                    throw new InvalidOperationException("No available spots.");
-
-                booking.IsCancelled = false;
-                await _repository.UpdateAsync(booking);
-
-                // increment spots
-                await IncrementSpotsAsync(baseUrl, request.WorkoutId);
-
-                return BookingMapper.ToResponse(booking);
-            }
-
-            throw new InvalidOperationException("Member is already booked for this workout.");
-        }
-
-        //ny bokning
-
+      if (booking.IsCancelled)
+      {
         // kontrollera om plats finns
         if (!await HasAvailableSpotsAsync(baseUrl, request.WorkoutId))
-            throw new InvalidOperationException("No available spots.");
+          throw new InvalidOperationException("No available spots.");
 
-        booking = BookingFactory.Create(request);
-        await _repository.AddAsync(booking);
-        await _context.SaveChangesAsync();
+        booking.IsCancelled = false;
+        await _repository.UpdateAsync(booking);
 
         // increment spots
         await IncrementSpotsAsync(baseUrl, request.WorkoutId);
 
         return BookingMapper.ToResponse(booking);
+      }
+
+      throw new InvalidOperationException("Member is already booked for this workout.");
     }
 
-    public async Task<bool> HasAvailableSpotsAsync(string baseUrl, Guid workoutId)
+    //ny bokning
+
+    // kontrollera om plats finns
+    if (!await HasAvailableSpotsAsync(baseUrl, request.WorkoutId))
+      throw new InvalidOperationException("No available spots.");
+
+    booking = BookingFactory.Create(request);
+    await _repository.AddAsync(booking);
+    await _context.SaveChangesAsync();
+
+    // increment spots
+    await IncrementSpotsAsync(baseUrl, request.WorkoutId);
+
+    return BookingMapper.ToResponse(booking);
+  }
+
+  public async Task<bool> HasAvailableSpotsAsync(string baseUrl, Guid workoutId)
+  {
+    var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/api/workouts/has-available-spots/{workoutId}");
+    var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+    if (!string.IsNullOrEmpty(token))
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}/api/workouts/has-available-spots/{workoutId}");
-        var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
-        if (!string.IsNullOrEmpty(token))
-        {
-            request.Headers.Add("Authorization", token);
-        }
-
-        var response = await _httpClient.SendAsync(request);
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Could not check available spots. Status: {response.StatusCode}");
-
-        return bool.Parse(await response.Content.ReadAsStringAsync());
+      request.Headers.Add("Authorization", token);
     }
 
-    public async Task IncrementSpotsAsync(string baseUrl, Guid workoutId)
+    var response = await _httpClient.SendAsync(request);
+    if (!response.IsSuccessStatusCode)
+      throw new InvalidOperationException($"Could not check available spots. Status: {response.StatusCode}");
+
+    return bool.Parse(await response.Content.ReadAsStringAsync());
+  }
+
+  public async Task IncrementSpotsAsync(string baseUrl, Guid workoutId)
+  {
+    var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/workouts/increment/{workoutId}");
+    var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+    if (!string.IsNullOrEmpty(token))
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/workouts/increment/{workoutId}");
-        var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
-        if (!string.IsNullOrEmpty(token))
-        {
-            request.Headers.Add("Authorization", token);
-        }
-        var response = await _httpClient.SendAsync(request);
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Could not increment spots. Status: {response.StatusCode}");
+      request.Headers.Add("Authorization", token);
     }
+    var response = await _httpClient.SendAsync(request);
+    if (!response.IsSuccessStatusCode)
+      throw new InvalidOperationException($"Could not increment spots. Status: {response.StatusCode}");
+  }
 
-    public async Task DecrementSpotsAsync(string baseUrl, Guid workoutId)
+  public async Task DecrementSpotsAsync(string baseUrl, Guid workoutId)
+  {
+    var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/workouts/decrement/{workoutId}");
+    var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+    if (!string.IsNullOrEmpty(token))
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/workouts/decrement/{workoutId}");
-        var token = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
-        if (!string.IsNullOrEmpty(token))
-        {
-            request.Headers.Add("Authorization", token);
-        }
-        var response = await _httpClient.SendAsync(request);
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException($"Could not decrement spots. Status: {response.StatusCode}");
+      request.Headers.Add("Authorization", token);
     }
 
+    var response = await _httpClient.SendAsync(request);
+    if (!response.IsSuccessStatusCode)
+      throw new InvalidOperationException($"Could not decrement spots. Status: {response.StatusCode}");
+  }
 
-    public async Task<IEnumerable<BookingResponse>?> GetAllBookingsByMemberIdAsync(Guid memberId)
-    {
-        var bookings = await _repository.GetAllAsync(x => x.MemberId == memberId);
 
-        if (bookings == null)
-            return null;
+  public async Task<IEnumerable<BookingResponse>?> GetAllBookingsByMemberIdAsync(Guid memberId)
+  {
+    var bookings = await _repository.GetAllAsync(x => x.MemberId == memberId);
 
-        return bookings.Select(BookingMapper.ToResponse).ToList();
-    }
-    public async Task<BookingResponse?> GetBookingByIdAsync(Guid id)
-    {
-        var booking = await _repository.GetByIdAsync(id);
+    if (bookings == null)
+      return null;
 
-        if (booking == null)
-            return null;    
+    return bookings.Select(BookingMapper.ToResponse).ToList();
+  }
+  public async Task<BookingResponse?> GetBookingByIdAsync(Guid id)
+  {
+    var booking = await _repository.GetByIdAsync(id);
 
-        return BookingMapper.ToResponse(booking);  
-    }
+    if (booking == null)
+      return null;
 
-    public async Task<bool> CancelBookingAsync(Guid memberId, Guid workoutId)
-    {
-        //Add business logic like time restrictions for cancelling here if needed
+    return BookingMapper.ToResponse(booking);
+  }
 
-        var baseUrl = _configuration["ScheduleServiceBaseUrl"];
+  public async Task<bool> CancelBookingAsync(Guid memberId, Guid workoutId)
+  {
+    //Add business logic like time restrictions for cancelling here if needed
 
-        var booking = await _repository.GetAsync(x => x.MemberId == memberId &&  x.WorkoutId == workoutId);
+    var baseUrl = _configuration["VITE_SCHEDULE_API_BASE_URL"];
 
-        if (booking == null || booking.IsCancelled)
-            return false;
-        
-        _repository.MarkAsCancelled(booking);
-        await _context.SaveChangesAsync();
+    var booking = await _repository.GetAsync(x => x.MemberId == memberId && x.WorkoutId == workoutId);
 
-        await DecrementSpotsAsync(baseUrl, workoutId);
+    if (booking == null || booking.IsCancelled)
+      return false;
 
-        return true;
-    }
+    _repository.MarkAsCancelled(booking);
+    await _context.SaveChangesAsync();
+
+    await DecrementSpotsAsync(baseUrl, workoutId);
+
+    return true;
+  }
 
 }
