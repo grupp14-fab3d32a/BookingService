@@ -83,8 +83,10 @@ jobs:
 
         env:
           ScheduleServiceBaseUrl: ${{ secrets.SCHEDULESERVICEBASEURL }}
+          VITE_SCHEDULE_API_BASE_URL: ${{ secrets.VITE_SCHEDULE_API_BASE_URL }}
 
           
+
 
 
 
