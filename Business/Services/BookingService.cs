@@ -22,7 +22,7 @@ public class BookingService(IBookingRepository repository, BookingContext contex
 
   public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
   {
-    var baseUrl = _configuration["VITE_SCHEDULE_API_BASE_URL"];
+    var baseUrl = _configuration["VITE_BOOKING_API_BASE_URL"];
 
     var booking = await _repository.GetAsync(x => x.MemberId == request.MemberId && x.WorkoutId == request.WorkoutId);
 
